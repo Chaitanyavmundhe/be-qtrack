@@ -1,0 +1,532 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===================== USERS & AUTH =====================
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(PRODUCTION)
+  department   String?
+  badgeNumber  String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  raisedNcrs         Ncr[]                 @relation("NcrRaisedBy")
+  assignedNcrs       Ncr[]                 @relation("NcrAssignedTo")
+  inspectionRuns     InspectionRun[]
+  operationLogs      OperationLog[]
+  auditLogs          AuditLog[]
+  notifications      Notification[]
+  bomVerifications   BomItemVerification[]
+  correctiveActions  CorrectiveAction[]    @relation("CAAssignedTo")
+  caVerifiedBy       CorrectiveAction[]    @relation("CAVerifiedBy")
+}
+
+enum Role {
+  ADMIN
+  ENGINEERING
+  PROCUREMENT
+  PRODUCTION
+  QUALITY_INSPECTOR
+  QUALITY_MANAGER
+  MANAGEMENT
+}
+
+// ===================== CUSTOMERS & PROJECTS =====================
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  code      String   @unique
+  address   String?
+  contact   String?
+  email     String?
+  phone     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projects Project[]
+}
+
+model Project {
+  id           String    @id @default(uuid())
+  projectNo    String    @unique
+  name         String
+  customerId   String
+  description  String?
+  status       String    @default("Active")
+  startDate    DateTime?
+  targetDate   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  customer   Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  workOrders WorkOrder[]
+}
+
+// ===================== PRODUCTS =====================
+
+model ProductTemplate {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  name              String
+  description       String?
+  category          String?
+  ratedVoltage      String?
+  ratedCurrent      String?
+  ratedFrequency    String?
+  specifications    Json?
+  imageUrl          String?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  workOrders WorkOrder[]
+}
+
+// ===================== WORK ORDERS =====================
+
+model WorkOrder {
+  id                String    @id @default(uuid())
+  workOrderNo       String    @unique
+  projectId         String
+  productTemplateId String
+  quantity          Int       @default(1)
+  status            String    @default("Created")
+  priority          String    @default("Normal")
+  description       String?
+  specifications    Json?
+  targetDate        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  project         Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  productTemplate ProductTemplate @relation(fields: [productTemplateId], references: [id])
+  panels          Panel[]
+  bomRevisions    BomRevision[]
+}
+
+// ===================== PANELS (Central Traceability Entity) =====================
+
+model Panel {
+  id             String      @id @default(uuid())
+  serialNumber   String      @unique
+  workOrderId    String
+  status         PanelStatus @default(DRAFT)
+  specifications Json?
+  qrCodeData     String?
+  notes          String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  workOrder        WorkOrder             @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  operationLogs    OperationLog[]
+  inspectionRuns   InspectionRun[]
+  ncrs             Ncr[]
+  bomVerifications BomItemVerification[]
+  attachments      Attachment[]
+  dispatchRecord   DispatchRecord?
+  statusHistory    PanelStatusHistory[]
+}
+
+enum PanelStatus {
+  DRAFT
+  ENGINEERING
+  BOM_APPROVED
+  MATERIAL_READY
+  MANUFACTURING
+  IN_PROCESS_QC
+  FINAL_TESTING
+  PDI
+  DISPATCH_READY
+  DISPATCHED
+  ON_HOLD
+  REWORK_REQUIRED
+  REJECTED
+  CANCELLED
+}
+
+model PanelStatusHistory {
+  id         String   @id @default(uuid())
+  panelId    String
+  fromStatus String
+  toStatus   String
+  changedBy  String
+  reason     String?
+  createdAt  DateTime @default(now())
+
+  panel Panel @relation(fields: [panelId], references: [id], onDelete: Cascade)
+}
+
+// ===================== BOM =====================
+
+model BomRevision {
+  id          String    @id @default(uuid())
+  bomNumber   String
+  workOrderId String
+  revision    Int       @default(1)
+  status      String    @default("Draft") // Draft, Submitted, Approved, Superseded
+  approvedBy  String?
+  approvedAt  DateTime?
+  notes       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  workOrder WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  items     BomItem[]
+
+  @@unique([bomNumber, revision])
+}
+
+model BomItem {
+  id              String   @id @default(uuid())
+  bomRevisionId   String
+  itemNo          Int
+  componentCode   String
+  componentName   String
+  manufacturer    String?
+  modelNumber     String?
+  requiredQty     Float
+  unit            String   @default("Nos")
+  technicalSpec   String?
+  category        String?
+  installLocation String?
+  batchNumber     String?
+  componentSerial String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  bomRevision   BomRevision           @relation(fields: [bomRevisionId], references: [id], onDelete: Cascade)
+  verifications BomItemVerification[]
+}
+
+model BomItemVerification {
+  id                  String    @id @default(uuid())
+  bomItemId           String
+  panelId             String
+  actualModel         String?
+  actualManufacturer String?
+  actualQty           Float?
+  actualSpec          String?
+  actualBatch         String?
+  actualSerial        String?
+  status              String    @default("Pending") // Matched, Missing, Excess, Mismatch, Pending, NA
+  remarks             String?
+  verifiedById        String?
+  verifiedAt          DateTime?
+  evidenceUrl         String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  bomItem    BomItem @relation(fields: [bomItemId], references: [id], onDelete: Cascade)
+  panel      Panel   @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  verifiedBy User?   @relation(fields: [verifiedById], references: [id])
+
+  @@unique([bomItemId, panelId])
+}
+
+// ===================== NCR & CORRECTIVE ACTIONS =====================
+
+model Ncr {
+  id                  String    @id @default(uuid())
+  ncrNumber           String    @unique
+  panelId             String?
+  workOrderId         String?
+  department          String?
+  defectCategory      String
+  defectDescription   String
+  severity            String    @default("Medium") // Low, Medium, High, Critical
+  status              NcrStatus @default(IDENTIFIED)
+  raisedById          String
+  assignedToId        String?
+  immediateCorrection String?
+  rootCauseMethod     String?   // 5Why, Fishbone, Manual, 8D
+  rootCauseAnalysis   String?
+  targetDate          DateTime?
+  closedAt            DateTime?
+  evidenceUrls        Json?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  panel             Panel?             @relation(fields: [panelId], references: [id], onDelete: SetNull)
+  raisedBy          User               @relation("NcrRaisedBy", fields: [raisedById], references: [id])
+  assignedTo        User?              @relation("NcrAssignedTo", fields: [assignedToId], references: [id])
+  correctiveActions CorrectiveAction[]
+  statusHistory     NcrStatusHistory[]
+  inspectionResults InspectionResult[]
+}
+
+enum NcrStatus {
+  IDENTIFIED
+  RAISED
+  ASSIGNED
+  UNDER_INVESTIGATION
+  ROOT_CAUSE_IDENTIFIED
+  CORRECTIVE_ACTION_ASSIGNED
+  ACTION_COMPLETED
+  VERIFICATION_PENDING
+  CLOSED
+  REOPENED
+  REJECTED
+  ON_HOLD
+}
+
+model NcrStatusHistory {
+  id         String   @id @default(uuid())
+  ncrId      String
+  fromStatus String
+  toStatus   String
+  changedBy  String
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  ncr Ncr @relation(fields: [ncrId], references: [id], onDelete: Cascade)
+}
+
+model CorrectiveAction {
+  id                 String    @id @default(uuid())
+  ncrId              String
+  actionType         String // Immediate Correction, Root-Cause Corrective, Preventive
+  description        String
+  assignedToId       String?
+  targetDate         DateTime?
+  completedAt        DateTime?
+  status             String    @default("Open") // Open, InProgress, Completed, Verified, Rejected
+  verificationResult String?
+  verifiedById       String?
+  verifiedAt         DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  ncr        Ncr   @relation(fields: [ncrId], references: [id], onDelete: Cascade)
+  assignedTo User? @relation("CAAssignedTo", fields: [assignedToId], references: [id])
+  verifiedBy User? @relation("CAVerifiedBy", fields: [verifiedById], references: [id])
+}
+
+// ===================== INSPECTIONS =====================
+
+model InspectionTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  type        String // PDI, InProcess, Incoming, FAI
+  productCode String?
+  version     Int      @default(1)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items InspectionTemplateItem[]
+  runs  InspectionRun[]
+}
+
+model InspectionTemplateItem {
+  id          String  @id @default(uuid())
+  templateId  String
+  category    String // Document, Visual, Mechanical, Electrical
+  itemNo      Int
+  checkItem   String
+  acceptance  String?
+  unit        String?
+  isMandatory Boolean @default(true)
+  sortOrder   Int     @default(0)
+
+  template InspectionTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+}
+
+model InspectionRun {
+  id           String    @id @default(uuid())
+  templateId   String
+  panelId      String
+  runNumber    Int       @default(1)
+  status       String    @default("InProgress") // InProgress, Completed, Approved, Rejected
+  inspectorId  String
+  approvedById String?
+  approvedAt   DateTime?
+  remarks      String?
+  reportPdfUrl String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  template  InspectionTemplate @relation(fields: [templateId], references: [id])
+  panel     Panel              @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  inspector User               @relation(fields: [inspectorId], references: [id])
+  results   InspectionResult[]
+}
+
+model InspectionResult {
+  id              String   @id @default(uuid())
+  inspectionRunId String
+  templateItemId  String?
+  checkItem       String
+  category        String
+  result          String? // Pass, Fail, NA
+  measuredValue   String?
+  unit            String?
+  acceptance      String?
+  comment         String?
+  evidenceUrl     String?
+  ncrId           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  inspectionRun InspectionRun @relation(fields: [inspectionRunId], references: [id], onDelete: Cascade)
+  ncr           Ncr?          @relation(fields: [ncrId], references: [id], onDelete: SetNull)
+}
+
+// ===================== ENGINEERING CHANGES (ECR / ECN) =====================
+
+model EngineeringChange {
+  id               String    @id @default(uuid())
+  ecrNumber        String    @unique
+  type             String // ECR, ECN
+  title            String
+  description      String
+  reason           String?
+  impactAssessment String?
+  affectedPanels   Json?
+  status           String    @default("Draft") // Draft, Submitted, UnderReview, Approved, Rejected, Implemented
+  requestedBy      String
+  approvedBy       String?
+  approvedAt       DateTime?
+  effectiveDate    DateTime?
+  newBomRevision   String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+// ===================== PRODUCTION OPERATIONS =====================
+
+model OperationLog {
+  id          String    @id @default(uuid())
+  panelId     String
+  operation   String
+  stage       String
+  description String?
+  operatorId  String
+  startTime   DateTime  @default(now())
+  endTime     DateTime?
+  status      String    @default("Completed") // InProgress, Completed, OnHold
+  remarks     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  panel    Panel @relation(fields: [panelId], references: [id], onDelete: Cascade)
+  operator User  @relation(fields: [operatorId], references: [id])
+}
+
+// ===================== DISPATCH =====================
+
+model DispatchRecord {
+  id              String    @id @default(uuid())
+  panelId         String    @unique
+  dispatchNumber  String    @unique
+  dispatchDate    DateTime
+  transportMode   String?
+  vehicleNo       String?
+  deliveryAddress String?
+  approvedBy      String?
+  approvedAt      DateTime?
+  remarks         String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  panel Panel @relation(fields: [panelId], references: [id], onDelete: Cascade)
+}
+
+// ===================== ATTACHMENTS =====================
+
+model Attachment {
+  id         String   @id @default(uuid())
+  panelId    String?
+  entityType String // Panel, NCR, Inspection, BOM, ECR
+  entityId   String
+  fileName   String
+  filePath   String
+  fileType   String
+  fileSize   Int
+  uploadedBy String
+  createdAt  DateTime @default(now())
+
+  panel Panel? @relation(fields: [panelId], references: [id], onDelete: Cascade)
+}
+
+// ===================== NOTIFICATIONS =====================
+
+model Notification {
+  id         String   @id @default(uuid())
+  userId     String
+  title      String
+  message    String
+  type       String // NCR_ASSIGNED, NCR_OVERDUE, INSPECTION_FAILED, PDI_READY, BOM_DISCREPANCY
+  entityType String?
+  entityId   String?
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ===================== AUDIT LOG =====================
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  action     String
+  entityType String
+  entityId   String
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ===================== SUPPLIERS & INCOMING =====================
+
+model Supplier {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  category  String?
+  address   String?
+  contact   String?
+  email     String?
+  phone     String?
+  rating    String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  incomingInspections IncomingInspection[]
+}
+
+model IncomingInspection {
+  id             String   @id @default(uuid())
+  grNumber       String   @unique
+  supplierId     String
+  materialName   String
+  quantity       Float
+  unit           String
+  batchNumber    String?
+  inspectionDate DateTime @default(now())
+  result         String   @default("Pending") // Pending, Accepted, Rejected, ConditionalAccept
+  remarks        String?
+  inspectedBy    String?
+  certificateUrl String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  supplier Supplier @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+}
