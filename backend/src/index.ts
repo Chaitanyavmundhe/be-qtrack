@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import path from 'path';
+import fs from 'fs';
 import { config } from './config';
 import { errorHandler } from './middleware/errorHandler';
 
@@ -56,6 +57,16 @@ app.get('/api/health', (_req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+// Serve frontend static build in production
+const frontendDist = path.resolve(__dirname, '../../frontend/dist');
+if (fs.existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(frontendDist, 'index.html'));
+  });
+}
 
 // Error handling middleware
 app.use(errorHandler);
