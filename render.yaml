@@ -19,4 +19,3 @@ databases:
   - name: beqtrack-db
     plan: free
     databaseName: beqtrack
-    user: postgres
