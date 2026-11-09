@@ -60,22 +60,22 @@ export const QualityReports: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 p-4 md:p-6 bg-industrial-surface overflow-y-auto space-y-6">
-      <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+    <div className="flex-1 p-3 sm:p-4 md:p-6 pb-24 sm:pb-20 bg-industrial-surface overflow-y-auto space-y-4 sm:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-stone-200">
         <div>
-          <h1 className="text-xl md:text-2xl font-black text-stone-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-black text-stone-900 tracking-tight">
             Quality Records & Inspection Reports
           </h1>
-          <p className="text-xs text-stone-500 mt-0.5">
+          <p className="text-xs text-stone-500 mt-0.5 leading-snug">
             Full compliance traceability: NCR defect register, 5-Whys corrective actions, and downloadable PDI release certificates
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex bg-stone-100 p-1 rounded-xl border border-stone-200">
+        <div className="flex bg-stone-100 p-1 rounded-xl border border-stone-200 shrink-0">
           <button
             onClick={() => setActiveReportTab('ncr')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-center ${
               activeReportTab === 'ncr'
                 ? 'bg-white text-stone-900 shadow-sm'
                 : 'text-stone-500 hover:text-stone-800'
@@ -85,7 +85,7 @@ export const QualityReports: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveReportTab('pdi')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-center ${
               activeReportTab === 'pdi'
                 ? 'bg-white text-stone-900 shadow-sm'
                 : 'text-stone-500 hover:text-stone-800'
@@ -96,22 +96,23 @@ export const QualityReports: React.FC = () => {
         </div>
       </div>
 
-      {/* NCR Register Table View */}
+      {/* NCR Register View */}
       {activeReportTab === 'ncr' && (
         <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
+          <div className="p-3.5 sm:p-4 border-b border-stone-100 flex items-center justify-between bg-stone-50/50">
             <span className="font-bold text-xs text-stone-900">
               Non-Conformance Reports (NCR) & 8D/CAPA Log
             </span>
             <button
               onClick={() => navigate('/ncr-fast')}
-              className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-lg transition-colors shadow-sm"
+              className="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-lg transition-colors shadow-sm shrink-0"
             >
-              + Raise New NCR
+              + Raise NCR
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-stone-100/70 border-b border-stone-200 text-stone-500 font-semibold uppercase text-[10px] tracking-wider">
@@ -170,19 +171,54 @@ export const QualityReports: React.FC = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile Card List View */}
+          <div className="md:hidden divide-y divide-stone-100">
+            {ncrs.map((n) => (
+              <div key={n.id} className="p-3.5 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono font-bold text-stone-900">{n.ncrNumber}</span>
+                  <StatusBadge status={n.status} size="sm" />
+                </div>
+                <div className="flex items-center gap-1.5 flex-wrap text-xs">
+                  {n.panel?.serialNumber && (
+                    <button
+                      onClick={() => navigate(`/panel/${n.panel.serialNumber}`)}
+                      className="font-mono text-amber-900 font-bold bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[11px]"
+                    >
+                      {n.panel.serialNumber}
+                    </button>
+                  )}
+                  <span className="text-[10px] bg-stone-100 text-stone-700 px-1.5 py-0.5 rounded font-medium">
+                    {n.defectCategory}
+                  </span>
+                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                    n.severity === 'High' || n.severity === 'Critical' ? 'bg-red-100 text-red-800' : 'bg-stone-100 text-stone-700'
+                  }`}>
+                    {n.severity}
+                  </span>
+                </div>
+                <p className="text-xs text-stone-600 line-clamp-2 leading-relaxed">{n.defectDescription}</p>
+                <span className="text-[10px] text-stone-400 block font-mono">
+                  Target: {n.targetDate ? new Date(n.targetDate).toLocaleDateString('en-IN') : '—'}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* PDI Reports Table View */}
+      {/* PDI Reports View */}
       {activeReportTab === 'pdi' && (
         <div className="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
-          <div className="p-4 border-b border-stone-100 bg-stone-50/50">
+          <div className="p-3.5 sm:p-4 border-b border-stone-100 bg-stone-50/50">
             <span className="font-bold text-xs text-stone-900">
               Pre-Dispatch Inspection (PDI) Reports & Digital Release Certificates
             </span>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-stone-100/70 border-b border-stone-200 text-stone-500 font-semibold uppercase text-[10px] tracking-wider">
@@ -228,6 +264,32 @@ export const QualityReports: React.FC = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card List View */}
+          <div className="md:hidden divide-y divide-stone-100">
+            {pdiRuns.map((r) => (
+              <div key={r.id} className="p-3.5 space-y-2.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-mono font-bold text-stone-900">{r.panel?.serialNumber}</span>
+                  <StatusBadge status={r.status} size="sm" />
+                </div>
+                <p className="text-xs text-stone-600">
+                  Run #{r.runNumber} • {r.panel?.workOrder?.project?.customer?.name} ({r.panel?.workOrder?.workOrderNo})
+                </p>
+                <div className="flex items-center justify-between text-[11px] text-stone-500 font-mono">
+                  <span>Inspector: {r.inspector?.name}</span>
+                  <span>{new Date(r.createdAt).toLocaleDateString('en-IN')}</span>
+                </div>
+                <button
+                  onClick={() => handleDownloadPdf(r.id, r.panel?.serialNumber)}
+                  className="w-full py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Download PDI Certificate PDF</span>
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       )}

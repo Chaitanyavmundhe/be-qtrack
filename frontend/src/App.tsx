@@ -65,8 +65,10 @@ const AppLayout: React.FC = () => {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
 
-          {/* Render Tablet Bottom Bar only in tablet mode */}
-          {appMode === 'tablet' && <TabletBottomBar />}
+          {/* Render Tablet/Mobile Bottom Bar when in tablet mode or on mobile screen */}
+          <div className={appMode === 'tablet' ? 'block' : 'block md:hidden'}>
+            <TabletBottomBar />
+          </div>
         </main>
       </div>
     </div>

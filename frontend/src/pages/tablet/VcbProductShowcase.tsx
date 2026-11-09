@@ -11,11 +11,11 @@ import {
 
 export const VcbProductShowcase: React.FC = () => {
   return (
-    <div className="flex-1 p-4 pb-20 bg-industrial-surface overflow-y-auto space-y-6 max-w-5xl mx-auto">
+    <div className="flex-1 p-3 sm:p-4 pb-24 sm:pb-20 bg-industrial-surface overflow-y-auto space-y-4 sm:space-y-6 max-w-5xl mx-auto">
       {/* Title & Product Header */}
-      <div className="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row items-center gap-6">
+      <div className="bg-white p-4 sm:p-6 rounded-xl sm:rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row items-center gap-4 sm:gap-6">
         {/* Real Product Image from website */}
-        <div className="w-full md:w-64 h-56 bg-stone-50 rounded-xl border border-stone-200 p-2 flex items-center justify-center shrink-0">
+        <div className="w-full sm:w-72 md:w-64 h-48 sm:h-56 bg-stone-50 rounded-xl border border-stone-200 p-2.5 flex items-center justify-center shrink-0 shadow-inner">
           <img
             src="/assets/12kv-vcb-panel.png"
             alt="12 kV Indoor Air-Insulated VCB Switchboard"
@@ -23,15 +23,15 @@ export const VcbProductShowcase: React.FC = () => {
           />
         </div>
 
-        <div className="flex-1 space-y-2">
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded font-mono">
+        <div className="flex-1 space-y-2 text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-2 flex-wrap">
+            <span className="text-[10px] font-bold text-amber-900 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded font-mono">
               STANDARD REFERENCE PRODUCT
             </span>
             <span className="text-xs text-stone-500 font-mono">IS 3427 / IEC 62271-200</span>
           </div>
 
-          <h1 className="text-xl md:text-2xl font-black text-stone-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-black text-stone-900 tracking-tight">
             12 kV Indoor Air-Insulated Draw-out VCB Panel
           </h1>
 
@@ -39,15 +39,15 @@ export const VcbProductShowcase: React.FC = () => {
             Fitted with <strong>ABB VD4 horizontal draw-out type vacuum circuit breaker</strong>. Engineered for 12 kV medium-voltage power distribution with door-closed racking, positive mechanical safety interlocks, and compact air-insulated construction.
           </p>
 
-          <div className="pt-2 flex flex-wrap gap-2 text-xs">
-            <span className="bg-stone-100 text-stone-800 px-2.5 py-1 rounded-md font-mono border border-stone-200">
+          <div className="pt-1 flex flex-wrap justify-center md:justify-start gap-1.5 text-xs">
+            <span className="bg-stone-100 text-stone-800 px-2.5 py-1 rounded-md font-mono border border-stone-200 text-[11px]">
               ABB Certified MV Panel Builder
             </span>
-            <span className="bg-stone-100 text-stone-800 px-2.5 py-1 rounded-md font-mono border border-stone-200">
+            <span className="bg-stone-100 text-stone-800 px-2.5 py-1 rounded-md font-mono border border-stone-200 text-[11px]">
               CPRI / ERDA Type Tested
             </span>
-            <span className="bg-stone-100 text-stone-800 px-2.5 py-1 rounded-md font-mono border border-stone-200">
-              Paint: RAL 7032 Siemens Grey
+            <span className="bg-stone-100 text-stone-800 px-2.5 py-1 rounded-md font-mono border border-stone-200 text-[11px]">
+              Paint: RAL 7032 Grey
             </span>
           </div>
 

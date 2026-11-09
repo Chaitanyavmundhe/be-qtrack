@@ -136,61 +136,61 @@ export const ShopfloorPdiChecklist: React.FC = () => {
   const failedCount = results.filter((r: any) => r.result === 'Fail').length;
 
   return (
-    <div className="flex-1 p-4 pb-20 bg-industrial-surface overflow-y-auto space-y-4">
+    <div className="flex-1 p-3 sm:p-4 pb-24 sm:pb-20 bg-industrial-surface overflow-y-auto space-y-3 sm:space-y-4">
       {/* Top Equipment Spec Header */}
-      <div className="bg-white p-4 rounded-xl border border-stone-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-base font-extrabold text-stone-900 font-mono">
+      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-stone-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-sm sm:text-base font-extrabold text-stone-900 font-mono">
               PDI Checklist: {panel?.serialNumber}
             </h2>
             <StatusBadge status={run?.status || 'InProgress'} size="sm" />
           </div>
-          <p className="text-xs text-stone-500 mt-0.5">
-            12 kV Indoor Air-Insulated VCB Switchboard | ABB VD4 1250A Breaker | Customer: {panel?.workOrder?.project?.customer?.name}
+          <p className="text-xs text-stone-500 mt-1 leading-relaxed">
+            12 kV Indoor VCB Switchboard | ABB VD4 1250A | Customer: <strong className="text-stone-700">{panel?.workOrder?.project?.customer?.name || 'Tata Power DDL'}</strong>
           </p>
         </div>
 
         {/* Action Buttons: PDF & Approval */}
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 shrink-0">
           <button
             onClick={handleDownloadPdf}
             disabled={pdfGenerating}
-            className="px-3 py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors"
+            className="w-full sm:w-auto px-3.5 py-2.5 sm:py-1.5 bg-stone-900 hover:bg-stone-800 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-colors"
           >
-            <FileDown className="w-3.5 h-3.5 text-amber-400" />
-            {pdfGenerating ? 'Generating...' : 'Download PDI PDF'}
+            <FileDown className="w-4 h-4 text-amber-400" />
+            <span>{pdfGenerating ? 'Generating...' : 'Download PDI PDF'}</span>
           </button>
 
           {(user?.role === 'ADMIN' || user?.role === 'QUALITY_MANAGER') && (
             <button
               onClick={() => handleQualityManagerApproval('Approved')}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-colors"
+              className="w-full sm:w-auto px-3.5 py-2.5 sm:py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-colors"
             >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              Approve Release
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Approve Release</span>
             </button>
           )}
         </div>
       </div>
 
       {actionMessage && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center justify-between">
-          <span>{actionMessage}</span>
-          <button onClick={() => setActionMessage(null)} className="text-emerald-600 font-bold ml-2">×</button>
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 flex items-center justify-between gap-2">
+          <span className="leading-snug">{actionMessage}</span>
+          <button onClick={() => setActionMessage(null)} className="text-emerald-700 font-bold p-1 shrink-0 text-sm">×</button>
         </div>
       )}
 
       {/* Progress Counter Pill */}
-      <div className="bg-stone-100 p-2.5 rounded-xl border border-stone-200 flex items-center justify-between text-xs">
-        <div className="flex items-center gap-4">
+      <div className="bg-stone-100 p-2.5 sm:p-3 rounded-xl border border-stone-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
           <span>
             Total Checks: <strong className="font-mono">{results.length}</strong>
           </span>
-          <span className="text-emerald-700">
+          <span className="text-emerald-700 font-medium">
             Passed: <strong className="font-mono">{passedCount}</strong>
           </span>
-          <span className="text-red-700">
+          <span className="text-red-700 font-medium">
             Failed: <strong className="font-mono">{failedCount}</strong>
           </span>
         </div>
@@ -208,7 +208,7 @@ export const ShopfloorPdiChecklist: React.FC = () => {
           return (
             <div
               key={item.id}
-              className={`bg-white rounded-xl p-4 border transition-all ${
+              className={`bg-white rounded-xl p-3.5 sm:p-4 border transition-all ${
                 isFail
                   ? 'border-red-300 bg-red-50/20 shadow-sm'
                   : isPass
@@ -216,9 +216,9 @@ export const ShopfloorPdiChecklist: React.FC = () => {
                   : 'border-stone-300'
               }`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2.5">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs font-mono font-bold text-stone-400">
                       #{idx + 1}
                     </span>
@@ -226,34 +226,36 @@ export const ShopfloorPdiChecklist: React.FC = () => {
                       {item.category}
                     </span>
                   </div>
-                  <h4 className="font-bold text-stone-900 text-sm mt-1">{item.checkItem}</h4>
-                  <p className="text-xs text-stone-500 mt-0.5">
+                  <h4 className="font-bold text-stone-900 text-sm mt-1 leading-snug">{item.checkItem}</h4>
+                  <p className="text-xs text-stone-500 mt-1 leading-relaxed">
                     <strong>Acceptance:</strong> {item.acceptance || 'Per approved technical drawings'}
                   </p>
                 </div>
 
-                {/* Big Touch Buttons: PASS / FAIL / NA */}
-                <div className="flex items-center gap-1.5 shrink-0 mt-2 sm:mt-0">
+                {/* Touch Buttons: PASS / FAIL */}
+                <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 shrink-0 mt-1 sm:mt-0 w-full sm:w-auto">
                   <button
+                    type="button"
                     onClick={() => handleUpdateResult(item.id, 'Pass', item.measuredValue, item.comment)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                    className={`py-2.5 px-4 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all min-h-[44px] sm:min-h-[36px] ${
                       isPass
                         ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-300'
-                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200 active:bg-stone-300'
                     }`}
                   >
-                    <Check className="w-3.5 h-3.5" /> PASS
+                    <Check className="w-4 h-4" /> PASS
                   </button>
 
                   <button
+                    type="button"
                     onClick={() => handleUpdateResult(item.id, 'Fail', item.measuredValue, item.comment, true)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 transition-all ${
+                    className={`py-2.5 px-4 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all min-h-[44px] sm:min-h-[36px] ${
                       isFail
                         ? 'bg-red-600 text-white shadow-sm ring-2 ring-red-300'
-                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200 active:bg-stone-300'
                     }`}
                   >
-                    <X className="w-3.5 h-3.5" /> FAIL
+                    <X className="w-4 h-4" /> FAIL
                   </button>
                 </div>
               </div>
@@ -261,7 +263,7 @@ export const ShopfloorPdiChecklist: React.FC = () => {
               {/* Measured Value Input Row */}
               <div className="mt-3 pt-2.5 border-t border-stone-100 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                 <div>
-                  <label className="text-[10px] text-stone-500 font-semibold uppercase block mb-0.5">
+                  <label className="text-[10px] text-stone-500 font-semibold uppercase block mb-1">
                     Measured Value {item.unit ? `(${item.unit})` : ''}
                   </label>
                   <input
@@ -269,12 +271,12 @@ export const ShopfloorPdiChecklist: React.FC = () => {
                     defaultValue={item.measuredValue || ''}
                     placeholder={item.unit ? `Enter ${item.unit}` : 'Result or observation'}
                     onBlur={(e) => handleUpdateResult(item.id, item.result || 'Pass', e.target.value, item.comment)}
-                    className="w-full px-2.5 py-1.5 border border-stone-300 rounded-md text-xs font-mono focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs font-mono focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[10px] text-stone-500 font-semibold uppercase block mb-0.5">
+                  <label className="text-[10px] text-stone-500 font-semibold uppercase block mb-1">
                     Inspector Observation / Remarks
                   </label>
                   <input
@@ -282,17 +284,15 @@ export const ShopfloorPdiChecklist: React.FC = () => {
                     defaultValue={item.comment || ''}
                     placeholder="e.g. Verified satisfactory"
                     onBlur={(e) => handleUpdateResult(item.id, item.result || 'Pass', item.measuredValue, e.target.value)}
-                    className="w-full px-2.5 py-1.5 border border-stone-300 rounded-md text-xs focus:outline-none focus:ring-1 focus:ring-amber-500"
+                    className="w-full px-3 py-2 border border-stone-300 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-amber-500 bg-white"
                   />
                 </div>
               </div>
 
               {isFail && (
-                <div className="mt-2 p-2 bg-red-100/60 border border-red-200 rounded text-[11px] text-red-800 flex items-center justify-between">
-                  <span className="flex items-center gap-1">
-                    <ShieldAlert className="w-3.5 h-3.5 text-red-600" />
-                    Inspection Failure: Automatically linked to Quality NCR register.
-                  </span>
+                <div className="mt-2.5 p-2.5 bg-red-100/70 border border-red-200 rounded-lg text-[11px] text-red-800 flex items-start gap-1.5">
+                  <ShieldAlert className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                  <span>Inspection Failure: Automatically linked to Quality NCR register.</span>
                 </div>
               )}
             </div>

@@ -55,12 +55,12 @@ export const Panel360View: React.FC = () => {
   const product = wo?.productTemplate;
 
   return (
-    <div className="flex-1 p-4 pb-20 bg-industrial-surface overflow-y-auto space-y-4">
+    <div className="flex-1 p-3 sm:p-4 pb-24 sm:pb-20 bg-industrial-surface overflow-y-auto space-y-3 sm:space-y-4">
       {/* Panel Top Passport Card */}
-      <div className="bg-white p-5 rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-start gap-4">
+      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-stone-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3.5 sm:gap-4 text-center sm:text-left">
           {/* QR Code Tag Box */}
-          <div className="w-20 h-20 p-1 bg-stone-50 border border-stone-300 rounded-xl flex items-center justify-center shrink-0">
+          <div className="w-24 h-24 sm:w-20 sm:h-20 p-1.5 bg-stone-50 border border-stone-300 rounded-xl flex items-center justify-center shrink-0 shadow-inner">
             {panel.qrCodeData ? (
               <img src={panel.qrCodeData} alt="Panel QR" className="w-full h-full object-contain" />
             ) : (
@@ -68,58 +68,59 @@ export const Panel360View: React.FC = () => {
             )}
           </div>
 
-          <div>
-            <div className="flex items-center gap-2">
+          <div className="min-w-0">
+            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
               <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">
                 Digital Traceability Passport
               </span>
               <StatusBadge status={panel.status} size="sm" />
             </div>
 
-            <h1 className="text-xl font-black text-stone-900 font-mono tracking-tight mt-0.5">
+            <h1 className="text-lg sm:text-xl font-black text-stone-900 font-mono tracking-tight mt-1 break-all">
               {panel.serialNumber}
             </h1>
 
             <p className="text-xs text-stone-600 font-medium mt-0.5">
-              {product?.name} | ABB VD4 Breaker
+              {product?.name || '12 kV Air-Insulated VCB'} | ABB VD4 Breaker
             </p>
 
-            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-stone-500 mt-2 font-mono">
-              <span>WO: <strong>{wo?.workOrderNo}</strong></span>
-              <span>Project: <strong>{project?.projectNo}</strong></span>
-              <span>Customer: <strong>{customer?.name}</strong></span>
+            <div className="flex flex-wrap justify-center sm:justify-start gap-x-3 gap-y-1 text-[11px] text-stone-500 mt-2 font-mono">
+              <span className="bg-stone-50 px-1.5 py-0.5 rounded border border-stone-200">WO: <strong>{wo?.workOrderNo}</strong></span>
+              <span className="bg-stone-50 px-1.5 py-0.5 rounded border border-stone-200">Project: <strong>{project?.projectNo}</strong></span>
+              <span className="bg-stone-50 px-1.5 py-0.5 rounded border border-stone-200">Customer: <strong>{customer?.name}</strong></span>
             </div>
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center justify-center gap-2 shrink-0">
           <button
             onClick={() => window.print()}
-            className="px-3 py-2 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors border border-stone-300"
+            className="w-full sm:w-auto px-4 py-2.5 sm:py-2 bg-stone-100 hover:bg-stone-200 active:bg-stone-300 text-stone-800 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-stone-300 shadow-sm"
           >
-            <Printer className="w-3.5 h-3.5" /> Print QR Tag
+            <Printer className="w-4 h-4 text-stone-700" />
+            <span>Print QR Tag</span>
           </button>
         </div>
       </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex border-b border-stone-200 bg-white px-3 rounded-xl shadow-sm overflow-x-auto text-xs">
+      {/* Navigation Tabs (Mobile touch-scrollable) */}
+      <div className="flex border-b border-stone-200 bg-white p-1 rounded-xl shadow-sm overflow-x-auto text-xs gap-1 select-none">
         {[
-          { key: 'timeline', label: 'Lifecycle Gates' },
+          { key: 'timeline', label: 'Lifecycle' },
           { key: 'operations', label: `Operations (${panel.operationLogs?.length || 0})` },
-          { key: 'bom', label: 'BOM Verification' },
+          { key: 'bom', label: 'BOM' },
           { key: 'ncr', label: `NCRs (${panel.ncrs?.length || 0})` },
-          { key: 'pdi', label: 'PDI Inspection' },
-          { key: 'specs', label: 'Technical Specs' },
+          { key: 'pdi', label: 'PDI Check' },
+          { key: 'specs', label: 'Specs' },
         ].map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
-            className={`py-3 px-4 font-semibold whitespace-nowrap transition-all border-b-2 ${
+            className={`py-2 px-3 sm:px-3.5 font-semibold whitespace-nowrap rounded-lg transition-all ${
               activeTab === tab.key
-                ? 'border-amber-500 text-stone-900'
-                : 'border-transparent text-stone-500 hover:text-stone-800'
+                ? 'bg-amber-500 text-stone-950 font-bold shadow-sm'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50'
             }`}
           >
             {tab.label}
@@ -270,32 +271,32 @@ export const Panel360View: React.FC = () => {
 
       {/* Tab 6: Technical Specifications */}
       {activeTab === 'specs' && (
-        <div className="bg-white p-5 rounded-xl border border-stone-200 shadow-sm space-y-3">
+        <div className="bg-white p-4 sm:p-5 rounded-xl border border-stone-200 shadow-sm space-y-3">
           <h3 className="font-bold text-stone-900 text-sm">Verified Product Technical Specifications</h3>
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="p-2.5 bg-stone-50 rounded-lg border border-stone-200">
-              <span className="text-[10px] text-stone-400 uppercase block">Rated Voltage</span>
-              <span className="font-mono font-bold text-stone-900 text-sm">12 kV</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 sm:gap-3 text-xs">
+            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+              <span className="text-[10px] text-stone-400 font-semibold uppercase block">Rated Voltage</span>
+              <span className="font-mono font-bold text-stone-900 text-sm mt-0.5 block">12 kV</span>
             </div>
-            <div className="p-2.5 bg-stone-50 rounded-lg border border-stone-200">
-              <span className="text-[10px] text-stone-400 uppercase block">Rated Current</span>
-              <span className="font-mono font-bold text-stone-900 text-sm">1250 A</span>
+            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+              <span className="text-[10px] text-stone-400 font-semibold uppercase block">Rated Current</span>
+              <span className="font-mono font-bold text-stone-900 text-sm mt-0.5 block">1250 A</span>
             </div>
-            <div className="p-2.5 bg-stone-50 rounded-lg border border-stone-200">
-              <span className="text-[10px] text-stone-400 uppercase block">Short-Time Withstand</span>
-              <span className="font-mono font-bold text-stone-900 text-sm">31.5 kA for 3s</span>
+            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+              <span className="text-[10px] text-stone-400 font-semibold uppercase block">Short-Time Withstand</span>
+              <span className="font-mono font-bold text-stone-900 text-sm mt-0.5 block">31.5 kA for 3s</span>
             </div>
-            <div className="p-2.5 bg-stone-50 rounded-lg border border-stone-200">
-              <span className="text-[10px] text-stone-400 uppercase block">Dielectric Withstand</span>
-              <span className="font-mono font-bold text-stone-900 text-sm">28 kV 1 min</span>
+            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+              <span className="text-[10px] text-stone-400 font-semibold uppercase block">Dielectric Withstand</span>
+              <span className="font-mono font-bold text-stone-900 text-sm mt-0.5 block">28 kV 1 min</span>
             </div>
-            <div className="p-2.5 bg-stone-50 rounded-lg border border-stone-200">
-              <span className="text-[10px] text-stone-400 uppercase block">Lightning Impulse</span>
-              <span className="font-mono font-bold text-stone-900 text-sm">75 kV</span>
+            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+              <span className="text-[10px] text-stone-400 font-semibold uppercase block">Lightning Impulse</span>
+              <span className="font-mono font-bold text-stone-900 text-sm mt-0.5 block">75 kV</span>
             </div>
-            <div className="p-2.5 bg-stone-50 rounded-lg border border-stone-200">
-              <span className="text-[10px] text-stone-400 uppercase block">Paint Shade</span>
-              <span className="font-mono font-bold text-stone-900 text-sm">RAL 7032 Siemens Grey</span>
+            <div className="p-3 bg-stone-50 rounded-xl border border-stone-200">
+              <span className="text-[10px] text-stone-400 font-semibold uppercase block">Paint Shade</span>
+              <span className="font-mono font-bold text-stone-900 text-sm mt-0.5 block">RAL 7032 Siemens Grey</span>
             </div>
           </div>
         </div>

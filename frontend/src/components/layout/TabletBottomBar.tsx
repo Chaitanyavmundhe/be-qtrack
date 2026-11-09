@@ -19,7 +19,7 @@ export const TabletBottomBar: React.FC = () => {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-stone-200 px-2 py-1 shadow-lg flex items-center justify-around safe-area-bottom">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-stone-200 px-1 py-1 shadow-2xl flex items-center justify-around pb-[max(0.35rem,env(safe-area-inset-bottom))] select-none">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         return (
@@ -27,15 +27,17 @@ export const TabletBottomBar: React.FC = () => {
             key={tab.to}
             to={tab.to}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center py-1.5 px-3 rounded-xl transition-all ${
+              `flex-1 min-w-0 flex flex-col items-center justify-center py-1 px-0.5 rounded-xl transition-all ${
                 isActive
-                  ? 'text-amber-700 bg-amber-50 font-bold scale-105'
-                  : 'text-stone-500 hover:text-stone-800'
+                  ? 'text-amber-900 bg-amber-100/80 font-bold'
+                  : 'text-stone-500 hover:text-stone-900 hover:bg-stone-50'
               }`
             }
           >
-            <Icon className="w-5 h-5 mb-0.5" />
-            <span className="text-[11px] font-medium tracking-tight">{tab.label}</span>
+            <Icon className="w-4 h-4 sm:w-5 sm:h-5 shrink-0" />
+            <span className="text-[10px] sm:text-[11px] font-medium tracking-tight truncate w-full text-center mt-0.5">
+              {tab.label}
+            </span>
           </NavLink>
         );
       })}
